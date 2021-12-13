@@ -1,0 +1,30 @@
+[
+  {
+    "id": 124344,
+    "name": "Riad",
+    "email": "mdsalah.cse@gmail.com",
+    "dateOfBirth": "27/12/2021 3:27:11 PM",
+    "password": "1"
+  },
+  {
+    "id": 529014,
+    "name": "aaa",
+    "email": "aaa.cse@gmail.com",
+    "password": "1",
+    "dateOfBirth": "12/12/2021 12:00:00 AM"
+  },
+  {
+    "id": 321434,
+    "name": "csds",
+    "email": "wewew.cse@gmail.com",
+    "password": "1",
+    "dateOfBirth": "12/5/2021 12:00:00 AM"
+  },
+  {
+    "id": 966956,
+    "name": "ppp",
+    "email": "ppp.cse@gmail.com",
+    "password": "1",
+    "dateOfBirth": "2021-12-05"
+  }
+]
