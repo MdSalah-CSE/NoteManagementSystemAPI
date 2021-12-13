@@ -26,5 +26,19 @@
     "email": "ppp.cse@gmail.com",
     "password": "1",
     "dateOfBirth": "2021-12-05"
+  },
+  {
+    "id": 523472,
+    "name": "Kamal Uddin",
+    "email": "KamalUddin@gmail.com",
+    "password": "111111",
+    "dateOfBirth": "2021-10-04"
+  },
+  {
+    "id": 989699,
+    "name": "Jamal Uddin",
+    "email": "jamaluddin@gmail.com",
+    "password": "111111",
+    "dateOfBirth": "2021-12-05"
   }
 ]

@@ -28,7 +28,7 @@ namespace NotesManagementSystem.Controllers
         //API for return reminders by Day/Week/Month 
         [Authorize]
         [HttpGet("GetRemindersForDayWeekMonth")]
-        public IActionResult GetRemindersForDayWeekMonth(int type)
+        public IActionResult GetRemindersForDayWeekMonth(int type, int userId)
         {
             try
             {
@@ -41,14 +41,14 @@ namespace NotesManagementSystem.Controllers
                 {
                     if (type == 1)  // for day
                     {
-                        if (item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Date == DateTime.Now.Date)
+                        if (item.UserId == userId && item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Date == DateTime.Now.Date)
                         {
                             Reminders.Add(item);
                         }
                     }
                     else if (type == 2)  // for week 
                     {
-                        if (item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Date >= DateTime.Now.Date
+                        if (item.UserId == userId && item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Date >= DateTime.Now.Date
                             && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Date < DateTime.Now.Date.AddDays(7))         //This week = Today + Next 6days
                         {
                             Reminders.Add(item);
@@ -56,7 +56,7 @@ namespace NotesManagementSystem.Controllers
                     }
                     else  // for month
                     {
-                        if (item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Month == DateTime.Now.Month)
+                        if (item.UserId == userId && item.Type == 2 && Convert.ToDateTime(item.ReminderDateTime, dateformat.DateTimeFormat).Month == DateTime.Now.Month)
                         {
                             Reminders.Add(item);
                         }
@@ -78,7 +78,7 @@ namespace NotesManagementSystem.Controllers
         //API for return tasks/todo by Day/Week/Month 
         [Authorize]
         [HttpGet("GetTasksForDayWeekMonth")]
-        public IActionResult GetTasksForDayWeekMonth(int type)
+        public IActionResult GetTasksForDayWeekMonth(int type, int userId)
         {
             try
             {
@@ -92,14 +92,14 @@ namespace NotesManagementSystem.Controllers
                 {
                     if (type == 1)   // for today
                     {
-                        if (item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Date == DateTime.Now.Date)
+                        if (item.UserId == userId && item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Date == DateTime.Now.Date)
                         {
                             tasks.Add(item);
                         }
                     }
                     else if (type == 2)   //for week
                     {
-                        if (item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Date >= DateTime.Now.Date
+                        if (item.UserId == userId && item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Date >= DateTime.Now.Date
                             && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Date < DateTime.Now.Date.AddDays(7))
                         {
                             tasks.Add(item);
@@ -107,7 +107,7 @@ namespace NotesManagementSystem.Controllers
                     }
                     else                 // for month
                     {
-                        if (item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Month == DateTime.Now.Month)
+                        if (item.UserId == userId && item.Type == 3 && Convert.ToDateTime(item.DueDate, dateformat.DateTimeFormat).Month == DateTime.Now.Month)
                         {
                             tasks.Add(item);
                         }
@@ -164,34 +164,15 @@ namespace NotesManagementSystem.Controllers
 
 
         [Authorize]
-        [HttpGet("GetAllNotes")]
-        public IActionResult GetAllNotes()
-        {
-            try
-            {
-                var json = System.IO.File.ReadAllText(path);
-                List<Note> notes = JsonConvert.DeserializeObject<List<Note>>(json);
-
-                return Ok(notes);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Add Error : " + ex.Message.ToString());
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
         [HttpGet("GetNoteByType")]
-        public IActionResult GetNoteByType(int type)
+        public IActionResult GetNoteByType(int type, int userId)
         {
             try
             {
                 var json = System.IO.File.ReadAllText(path);
                 List<Note> notes = JsonConvert.DeserializeObject<List<Note>>(json);
 
-                List<Note> finalNotes = notes.Where(x => x.Type == type).ToList();
+                List<Note> finalNotes = notes.Where(x => x.Type == type && x.UserId == userId).ToList();
 
                 return Ok(finalNotes);
             }
@@ -207,14 +188,14 @@ namespace NotesManagementSystem.Controllers
 
         [Authorize]
         [HttpGet("GetCountOfNotesByType")]
-        public IActionResult GetCountOfNotesByType(int type)
+        public IActionResult GetCountOfNotesByType(int type, int userId)
         {
             try
             {
                 var json = System.IO.File.ReadAllText(path);
                 List<Note> notes = JsonConvert.DeserializeObject<List<Note>>(json);
 
-                List<Note> finalNotes = notes.Where(x => x.Type == type).ToList();
+                List<Note> finalNotes = notes.Where(x => x.Type == type && x.UserId == userId).ToList();
 
                 return Ok(finalNotes.Count);
             }
@@ -228,12 +209,13 @@ namespace NotesManagementSystem.Controllers
 
         [Authorize]
         [HttpGet("GetCountOfIndividualNotes")]
-        public IActionResult GetCountOfIndividualNotes()
+        public IActionResult GetCountOfIndividualNotes(int userId)
         {
             try
             {
                 var json = System.IO.File.ReadAllText(path);
-                List<Note> notes = JsonConvert.DeserializeObject<List<Note>>(json);
+                List<Note> notes = JsonConvert.DeserializeObject<List<Note>>(json).Where(x => x.UserId == userId).ToList();
+
 
                 List<object> counts = new List<object>();
                 object countOfRegularNotes = new { type = 1, count = notes.Where(x => x.Type == 1).ToList().Count };
@@ -265,29 +247,33 @@ namespace NotesManagementSystem.Controllers
         {
             try
             {
-                note.MakeDate = DateTime.Now.ToString();
-                int random = _random.Next(100000, 999999);
-                var newNote = "{ 'id': " + random + ",'type': '" + note.Type + "','text': '" + note.Text + "','reminderDateTime': '" + note.ReminderDateTime +
-                    "','dueDate': '" + note.DueDate + "','taskStatus': '" + note.TaskStatus + "','webURL': '" + note.WebURL + "','makeDate': '" + note.MakeDate + "'}";
-
-                var json = System.IO.File.ReadAllText(path);
-                var jsonObj = JArray.Parse(json);
-                var newUserObj = JObject.Parse(newNote);
-
-                jsonObj.Add(newUserObj);
-
-                string newJsonResult = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj,
-                                       Newtonsoft.Json.Formatting.Indented);
-                System.IO.File.WriteAllText(path, newJsonResult);
-
-
-                object returnObj = new
+                if(note.UserId != null && note.Type != null)
                 {
-                    RetCode = "1",
-                    RetMsg = "ok",
-                };
+                    note.MakeDate = DateTime.Now.ToString();
+                    int random = _random.Next(100000, 999999);
+                    var newNote = "{ 'id': " + random + ",'userId': " + note.UserId + ",'type': '" + note.Type + "','text': '" + note.Text + "','reminderDateTime': '" + note.ReminderDateTime +
+                        "','dueDate': '" + note.DueDate + "','taskStatus': '" + note.TaskStatus + "','webURL': '" + note.WebURL + "','makeDate': '" + note.MakeDate + "'}";
 
-                return Ok(returnObj);
+                    var json = System.IO.File.ReadAllText(path);
+                    var jsonObj = JArray.Parse(json);
+                    var newUserObj = JObject.Parse(newNote);
+
+                    jsonObj.Add(newUserObj);
+
+                    string newJsonResult = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj,
+                                           Newtonsoft.Json.Formatting.Indented);
+                    System.IO.File.WriteAllText(path, newJsonResult);
+
+
+                    object returnObj = new
+                    {
+                        RetCode = "1",
+                        RetMsg = "ok",
+                    };
+
+                    return Ok(returnObj);
+                }
+                
 
             }
             catch (Exception ex)

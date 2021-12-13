@@ -32,6 +32,7 @@ namespace NotesManagementSystem.Controllers
             {
                 RetCode = "0",
                 RetMsg = "notOk",
+                UserId="",
                 UserName = "",
                 Email = "",
                 DateOfBith = "",
@@ -52,6 +53,7 @@ namespace NotesManagementSystem.Controllers
                     {
                         RetCode = "1",
                         RetMsg = "ok",
+                        UserId=isUser.Id,
                         UserName = isUser.Name,
                         Email = isUser.Email,
                         DateOfBirth = isUser.DateOfBirth,
